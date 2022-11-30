@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShoppingLikeFlies.Api.Contracts.Incoming;
 using ShoppingLikeFlies.Api.Contracts.Response;
 
 namespace ShoppingLikeFlies.Api.Controllers
@@ -12,7 +13,10 @@ namespace ShoppingLikeFlies.Api.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public Task<ActionResult<LoginResponse>> OnPostAsync()
+        public Task<ActionResult<LoginResponse>> OnPostAsync
+            (
+                [FromBody] LoginRequest contract
+            )
         {
             throw new NotImplementedException();
         }

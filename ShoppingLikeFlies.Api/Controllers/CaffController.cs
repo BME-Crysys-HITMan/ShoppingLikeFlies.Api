@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShoppingLikeFlies.Api.Contracts.Incoming;
 using ShoppingLikeFlies.Api.Contracts.Response;
 
 namespace ShoppingLikeFlies.Api.Controllers
@@ -39,9 +40,10 @@ namespace ShoppingLikeFlies.Api.Controllers
         [HttpPut]
         [Route("{id:guid}")]
         [Authorize(Policy = "AdminOnly")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public Task<ActionResult> UpdateAsync(
-            [FromRoute] Guid id
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public Task<ActionResult<CaffResponse>> UpdateAsync(
+            [FromRoute] Guid id,
+            [FromBody] UpdateCaffRequest contract
         )
         {
             throw new NotImplementedException();
@@ -51,7 +53,7 @@ namespace ShoppingLikeFlies.Api.Controllers
         [Route("{id:guid}")]
         [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public Task<ActionResult> DeleteAsync(
+        public Task<IActionResult> DeleteAsync(
             [FromRoute] Guid id
         )
         {

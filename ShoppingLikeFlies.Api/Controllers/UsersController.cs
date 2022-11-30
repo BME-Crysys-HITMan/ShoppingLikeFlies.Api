@@ -31,10 +31,10 @@ public class UsersController : ControllerBase
 
     [HttpPut]
     [Route("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [Authorize(Policy = "OnlySelf")]
-    public Task<ActionResult> OnUpdateAsync
+    public Task<ActionResult<UserResponse>> OnUpdateAsync
         (
             [FromRoute] Guid id,
             [FromBody] UpdateUserRequest contract
