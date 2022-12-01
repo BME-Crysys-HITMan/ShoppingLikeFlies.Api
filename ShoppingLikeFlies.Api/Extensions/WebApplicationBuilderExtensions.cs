@@ -1,11 +1,11 @@
-﻿namespace ShoppingLikeFlies.Api.Extensions;
+﻿using Serilog;
+
+namespace ShoppingLikeFlies.Api.Extensions;
 
 public static class WebApplicationBuilderExtensions
 {
     public static WebApplication AddServices(this WebApplicationBuilder builder)
     {
-        builder.AddLogging();
-
         builder.Services.AddSecurity(builder.Configuration);
 
         builder.Services.AddDefaultServices(builder.Configuration);
@@ -15,6 +15,10 @@ public static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder AddLogging(this WebApplicationBuilder builder)
     {
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .CreateLogger();
+        builder.Host.UseSerilog();
         return builder;
     }
 }

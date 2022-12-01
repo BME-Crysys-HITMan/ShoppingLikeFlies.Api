@@ -1,11 +1,26 @@
 using ShoppingLikeFlies.Api.Extensions;
-
+using Serilog;
 var builder = WebApplication.CreateBuilder(args);
+builder.AddLogging();
+try
+{
+    //Using static logger before DI
+    Log.Information("Starting WebApi...");
 
-var app = builder.AddServices();
+    var app = builder.AddServices();
 
-await app.UseDatabase();
+    await app.UseDatabase();
 
-app.UsePipeline();
+    app.UsePipeline();
 
-app.Run();
+    app.Run();
+
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "WebApi startup failed");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
