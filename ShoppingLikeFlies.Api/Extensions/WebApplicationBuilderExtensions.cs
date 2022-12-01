@@ -18,6 +18,7 @@ public static class WebApplicationBuilderExtensions
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)
             .CreateLogger();
+        builder.Host.UseSerilog();
         return builder;
     }
 }
