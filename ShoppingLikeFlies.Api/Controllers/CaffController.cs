@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
 using Microsoft.AspNetCore.Mvc;
-using ShoppingLikeFlies.Api.Contracts.Incoming;
-using ShoppingLikeFlies.Api.Contracts.Response;
+using ShoppingLikeFiles.DomainServices.DTOs;
 
 namespace ShoppingLikeFlies.Api.Controllers
 {
@@ -9,12 +8,21 @@ namespace ShoppingLikeFlies.Api.Controllers
     [ApiController]
     public class CaffController : ControllerBase
     {
+        private readonly ICaffService caffService;
+        private readonly IDataService dataService;
+        private readonly Serilog.ILogger logger;
+        private readonly IMapper mapper;
+
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public Task<ActionResult<List<CaffResponse>>> GetAllAsync()
+        public async Task<ActionResult<List<CaffResponse>>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var models = await dataService.GetAllAsync();
+
+            var respone = mapper.Map<List<CaffResponse>>(models);
+
+            return respone;
         }
 
         [HttpPost]
@@ -26,46 +34,61 @@ namespace ShoppingLikeFlies.Api.Controllers
         }
 
         [HttpGet]
-        [Route("{id:guid}")]
+        [Route("{id:int}")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public Task<ActionResult<CaffResponse>> GetOne(
-            [FromRoute] Guid id
+        public async Task<ActionResult<CaffResponse>> GetOne(
+            [FromRoute] int id
         )
         {
-            throw new NotImplementedException();
+            var model = await dataService.GetCaffAsync(id);
+
+            var response = mapper.Map<CaffResponse>(model);
+
+            return response;
         }
 
         [HttpPut]
-        [Route("{id:guid}")]
+        [Route("{id:int}")]
         [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public Task<ActionResult<CaffResponse>> UpdateAsync(
-            [FromRoute] Guid id,
+        public async Task<ActionResult<CaffResponse>> UpdateAsync(
+            [FromRoute] int id,
             [FromBody] UpdateCaffRequest contract
         )
         {
-            throw new NotImplementedException();
+            var model = mapper.Map<CaffDTO>(contract);
+
+            model.Id = id;
+
+            await dataService.UpdateCaffAsync(model);
+            var data = await dataService.GetCaffAsync(id);
+
+            var response = mapper.Map<CaffResponse>(data);
+
+            return response;
         }
 
         [HttpDelete]
-        [Route("{id:guid}")]
+        [Route("{id:int}")]
         [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public Task<IActionResult> DeleteAsync(
-            [FromRoute] Guid id
+        public async Task<IActionResult> DeleteAsync(
+            [FromRoute] int id
         )
         {
-            throw new NotImplementedException();
+            await dataService.DeleteCaffAsync(id).ConfigureAwait(false);
+
+            return NoContent();
         }
 
         [HttpGet]
-        [Route("{id:guid}/download")]
+        [Route("{id:int}/download")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public Task<ActionResult<DownloadResponse>> DownloadAsync(
-            [FromRoute] Guid id
+            [FromRoute] int id
         )
         {
             throw new NotImplementedException();

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ShoppingLikeFiles.DomainServices;
 using ShoppingLikeFlies.Api.Security.DAL;
 
 namespace ShoppingLikeFlies.Api.Extensions;
@@ -57,6 +58,8 @@ public static class WebApplicationExtensions
         }
 
 
+        app.UseDomainServices(app.Environment.IsDevelopment());
+
         return app;
     }
 
@@ -71,9 +74,10 @@ public static class WebApplicationExtensions
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapControllers();
+        app.MapControllers().RequireAuthorization("ValidToken");
         return app;
     }
 }

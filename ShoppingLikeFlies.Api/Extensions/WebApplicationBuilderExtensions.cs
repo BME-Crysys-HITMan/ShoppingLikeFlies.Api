@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace ShoppingLikeFlies.Api.Extensions;
+﻿namespace ShoppingLikeFlies.Api.Extensions;
 
 public static class WebApplicationBuilderExtensions
 {
@@ -9,6 +7,8 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddSecurity(builder.Configuration);
 
         builder.Services.AddDefaultServices(builder.Configuration);
+
+        builder.Services.AddCustomService(builder.Configuration);
 
         return builder.Build();
     }
