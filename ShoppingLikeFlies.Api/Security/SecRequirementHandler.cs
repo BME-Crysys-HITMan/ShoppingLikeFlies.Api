@@ -13,12 +13,18 @@ namespace ShoppingLikeFlies.Api.Security
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, SecRequirement requirement)
         {
-            var id = context.User.Claims.First(c => c.Type == "Id").Value;
-            var userId = context.User.Claims.First(c => c.Type == "uuid").Value;
+            var id = context.User.Claims.FirstOrDefault(c => c.Type == "Id");
+            var userId = context.User.Claims.FirstOrDefault(c => c.Type == "uuid");
 
-            Guid guid = Guid.Parse(id);
+            if(id is null || userId is null)
+            {
+                context.Fail();
+                return Task.CompletedTask;
+            }
 
-            if (cache.ValidateToken(guid, userId))
+            Guid guid = Guid.Parse(id.Value);
+
+            if (cache.ValidateToken(guid, userId.Value))
             {
                 context.Succeed(requirement);
             }
