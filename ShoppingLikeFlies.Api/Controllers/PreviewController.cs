@@ -7,10 +7,18 @@ namespace ShoppingLikeFlies.Api.Controllers;
 [AllowAnonymous]
 public class PreviewController : ControllerBase
 {
-    [HttpGet]
-    [Route("{id:guid}")]
-    public Task<ActionResult> OnGet([FromRoute] Guid id)
+    private readonly IDataService dataService;
+
+    public PreviewController(IDataService dataService)
     {
-        throw new NotImplementedException();
+        this.dataService = dataService;
+    }
+
+    [HttpGet]
+    [Route("{id:int}")]
+    public async Task<ActionResult> OnGet([FromRoute] int id)
+    {
+        var caff = await dataService.GetCaffAsync(id);
+        return Content(caff.ThumbnailPath);
     }
 }
