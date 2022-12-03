@@ -74,14 +74,15 @@ public static class IServiceCollectionExtensions
 
     public static IServiceCollection AddCustomService(this IServiceCollection services, IConfiguration configuration)
     {
-        string validatorPath = "";
-        string GeneratorDir = "";
-        bool useAzure = false;
-        string DirectoryPath = ".";
+        string validatorPath = configuration.GetSection("CaffValidator").GetValue<string>("ValidatorPath");
+        string GeneratorDir = configuration.GetSection("CaffValidator").GetValue<string>("GeneratorDir");
+        bool useAzure = configuration.GetSection("CaffValidator").GetValue<bool>("UseAzure");
+        string DirectoryPath = configuration.GetSection("CaffValidator").GetValue<string>("DirectoryPath");
 
         services.AddCaffProcessor(
-            x => { x.Validator = validatorPath; x.GeneratorDir = GeneratorDir; },
+            x => { x.Validator = validatorPath; },
             upload => { upload.ShouldUploadToAzure = useAzure; upload.DirectoryPath = DirectoryPath; },
+            z => { z.GeneratorDir = GeneratorDir; },
             configuration);
 
         return services;
