@@ -10,11 +10,11 @@ namespace ShoppingLikeFlies.Api.Controllers
     public class LoginController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly ILogger<LoginController> logger;
+        private readonly Serilog.ILogger logger;
         private readonly ITokenGenerator token;
         private readonly ITokenCache cache;
 
-        public LoginController(UserManager<ApplicationUser> userManager, ITokenGenerator token, ITokenCache cache, ILogger<LoginController> logger)
+        public LoginController(UserManager<ApplicationUser> userManager, ITokenGenerator token, ITokenCache cache, ILogger logger)
         {
             this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             this.logger = logger;
@@ -31,7 +31,7 @@ namespace ShoppingLikeFlies.Api.Controllers
                 [FromBody] LoginRequest contract
             )
         {
-            logger.LogInformation("Method {method} called with params: {username}", nameof(OnPostAsync), contract.username);
+            logger.Debug("Method {method} called with params: {username}", nameof(OnPostAsync), contract.username);
             var user = await userManager.FindByNameAsync(contract.username);
             if (user == null)
             {
@@ -53,7 +53,7 @@ namespace ShoppingLikeFlies.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OnDelete()
         {
-            logger.LogInformation("Method {method} called", nameof(OnDelete));
+            logger.Verbose("Method {method} called");
             var tokenId = User.Claims.FirstOrDefault(x => x.Type == "Id");
             var userId = User.Claims.FirstOrDefault(x => x.Type == "uuid");
 
