@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using ShoppingLikeFlies.Api.Configuration;
 using ShoppingLikeFlies.Api.Security;
 using ShoppingLikeFlies.Api.Security.DAL;
