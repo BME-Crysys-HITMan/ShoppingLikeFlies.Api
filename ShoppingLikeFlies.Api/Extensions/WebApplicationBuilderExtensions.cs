@@ -20,6 +20,8 @@ public static class WebApplicationBuilderExtensions
             .CreateLogger();
 
         builder.Host.UseSerilog((ctx, lc) => lc
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("app", "ShoppingLikeflies.Api")
             .WriteTo.Console()
             .ReadFrom.Configuration(builder.Configuration));
 
