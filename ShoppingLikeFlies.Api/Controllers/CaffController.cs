@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
+using ShoppingLikeFiles.DomainServices.Core;
 using ShoppingLikeFiles.DomainServices.DTOs;
 
 namespace ShoppingLikeFlies.Api.Controllers
@@ -10,10 +11,11 @@ namespace ShoppingLikeFlies.Api.Controllers
     {
         private readonly ICaffService caffService;
         private readonly IDataService dataService;
-        private readonly Serilog.ILogger logger;
+        private readonly IUploadService uploadService;
+        private readonly ILogger<CaffController> logger;
         private readonly IMapper mapper;
 
-        public CaffController(ICaffService caffService, IDataService dataService, Serilog.ILogger logger, IMapper mapper)
+        public CaffController(ICaffService caffService, IDataService dataService, IUploadService uploadService, ILogger<CaffController> logger, IMapper mapper)
         {
             this.caffService = caffService;
             this.dataService = dataService;
@@ -26,6 +28,8 @@ namespace ShoppingLikeFlies.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<CaffAllResponse>>> GetAllAsync()
         {
+            logger.LogInformation("Method {method} called", nameof(GetAllAsync));
+
             var models = await dataService.GetAllAsync();
 
             var respone = mapper.Map<List<CaffAllResponse>>(models);
@@ -95,11 +99,35 @@ namespace ShoppingLikeFlies.Api.Controllers
         [Route("{id:int}/download")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public Task<ActionResult<DownloadResponse>> DownloadAsync(
+        public async Task<ActionResult<DownloadResponse>> DownloadAsync(
             [FromRoute] int id
         )
         {
-            throw new NotImplementedException();
+            var caff = await dataService.GetCaffAsync(id);
+            return new DownloadResponse(caff.FilePath);
+        }
+
+        [HttpPost]
+        [Route("upload")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
+        public async Task<ActionResult> UploadAsync([FromForm] IFormFile file)
+        {
+            if (file.Length < 1)
+                return new UnsupportedMediaTypeResult();
+
+            var caffFileName = Path.GetRandomFileName();
+            using var stream = System.IO.File.Create(caffFileName);
+            await file.CopyToAsync(stream);
+            var result = await caffService.ValidateFileAsync(stream.Name);
+            if (result == null)
+            {
+                return new UnsupportedMediaTypeResult();
+            }
+            using var memoryStream= new MemoryStream();
+            stream.CopyTo(memoryStream);
+            await uploadService.UploadFileAsync(memoryStream.ToArray(), caffFileName);
+            return Ok();
         }
     }
 }
