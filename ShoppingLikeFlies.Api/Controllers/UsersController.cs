@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ShoppingLikeFlies.Api.Contracts.Incoming.Users;
-using ShoppingLikeFlies.Api.Contracts.Response;
 
 namespace ShoppingLikeFlies.Api.Controllers;
 

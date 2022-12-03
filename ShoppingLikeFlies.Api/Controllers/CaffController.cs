@@ -13,6 +13,14 @@ namespace ShoppingLikeFlies.Api.Controllers
         private readonly Serilog.ILogger logger;
         private readonly IMapper mapper;
 
+        public CaffController(ICaffService caffService, IDataService dataService, Serilog.ILogger logger, IMapper mapper)
+        {
+            this.caffService = caffService;
+            this.dataService = dataService;
+            this.logger = logger;
+            this.mapper = mapper;
+        }
+
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]

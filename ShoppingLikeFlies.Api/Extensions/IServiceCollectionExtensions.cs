@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using ShoppingLikeFlies.Api.Configuration;
 using ShoppingLikeFlies.Api.Security;
 using ShoppingLikeFlies.Api.Security.DAL;
+using ShoppingLikeFlies.Api.Security.Validators;
 using ShoppingLikeFlies.Api.Services;
 using System.Text;
 
@@ -93,6 +94,8 @@ public static class IServiceCollectionExtensions
             upload => { upload.ShouldUploadToAzure = useAzure; upload.DirectoryPath = DirectoryPath; },
             z => { z.GeneratorDir = GeneratorDir; },
             configuration);
+
+        services.AddTransient<IValidator<RegisterRequest>, RegistrationValidator>();
 
         return services;
     }
