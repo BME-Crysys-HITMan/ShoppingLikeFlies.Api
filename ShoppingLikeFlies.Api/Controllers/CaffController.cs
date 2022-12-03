@@ -24,11 +24,11 @@ namespace ShoppingLikeFlies.Api.Controllers
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<CaffResponse>>> GetAllAsync()
+        public async Task<ActionResult<List<CaffAllResponse>>> GetAllAsync()
         {
             var models = await dataService.GetAllAsync();
 
-            var respone = mapper.Map<List<CaffResponse>>(models);
+            var respone = mapper.Map<List<CaffAllResponse>>(models);
 
             return respone;
         }

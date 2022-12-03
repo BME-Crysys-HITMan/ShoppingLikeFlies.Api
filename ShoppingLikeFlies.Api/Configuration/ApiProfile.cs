@@ -7,6 +7,7 @@ namespace ShoppingLikeFlies.Api.Configuration
         public ApiProfile()
         {
             CreateMap<CaffDTO, CaffResponse>().ReverseMap();
+            CreateMap<CaffDTO, CaffAllResponse>();
             CreateMap<UpdateCaffRequest, CaffDTO>();
         }
     }
