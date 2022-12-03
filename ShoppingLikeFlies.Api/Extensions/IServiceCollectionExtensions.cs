@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using ShoppingLikeFlies.Api.Configuration;
 using ShoppingLikeFlies.Api.Security;
 using ShoppingLikeFlies.Api.Security.DAL;
@@ -85,7 +86,21 @@ public static class IServiceCollectionExtensions
             {
                 Name = "Authorization",
                 In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http
+                Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
+            });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                             Type = ReferenceType.SecurityScheme,
+                             Id = "Bearer"
+                        }
+                    },
+                    new string[] { }
+                }
             });
         });
         return services;
