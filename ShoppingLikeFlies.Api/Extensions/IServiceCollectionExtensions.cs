@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using ShoppingLikeFlies.Api.Configuration;
 using ShoppingLikeFlies.Api.Security;
@@ -17,6 +18,14 @@ public static class IServiceCollectionExtensions
         var secConfig = new SecurityConfiguration();
 
         configuration.Bind(SecurityConfiguration.SectionName, secConfig);
+
+        services.Configure<SecurityConfiguration>(x =>
+        {
+            x.Issuer = secConfig.Issuer;
+            x.Audience = secConfig.Audience;
+            x.Duration = secConfig.Duration;
+            x.Key = secConfig.Key;
+        });
 
         services.AddDbContext<SecurityDbContext>(options =>
             options.UseSqlServer(secConfig.ConnectionString));

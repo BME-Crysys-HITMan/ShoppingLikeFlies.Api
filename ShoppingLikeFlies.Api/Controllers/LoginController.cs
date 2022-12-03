@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ShoppingLikeFlies.Api.Security.DAL;
+using ShoppingLikeFlies.Api.Services;
 
 namespace ShoppingLikeFlies.Api.Controllers
 {
@@ -10,6 +11,16 @@ namespace ShoppingLikeFlies.Api.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly Serilog.ILogger logger;
+        private readonly ITokenGenerator token;
+        private readonly ITokenCache cache;
+
+        public LoginController(UserManager<ApplicationUser> userManager, ITokenGenerator token, ITokenCache cache, ILogger logger)
+        {
+            this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            this.logger = logger;
+            this.token = token ?? throw new ArgumentNullException(nameof(token)); ;
+            this.cache = cache ?? throw new ArgumentNullException(nameof(cache)); ;
+        }
 
         [HttpPost]
         [AllowAnonymous]
@@ -20,6 +31,7 @@ namespace ShoppingLikeFlies.Api.Controllers
                 [FromBody] LoginRequest contract
             )
         {
+            logger.Debug("Method {method} called with params: {username}", nameof(OnPostAsync), contract.username);
             var user = await userManager.FindByNameAsync(contract.username);
             if (user == null)
             {
@@ -30,7 +42,8 @@ namespace ShoppingLikeFlies.Api.Controllers
 
             if (isCorrect)
             {
-
+                var jwt = await token.GenerateToken(user);
+                return new LoginResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await userManager.IsInRoleAsync(user, "Admin") ,jwt);
             }
 
             return Unauthorized();
@@ -38,9 +51,20 @@ namespace ShoppingLikeFlies.Api.Controllers
 
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public Task<IActionResult> OnDeleteAsync()
+        public IActionResult OnDelete()
         {
-            throw new NotImplementedException();
+            logger.Verbose("Method {method} called");
+            var tokenId = User.Claims.FirstOrDefault(x => x.Type == "Id");
+            var userId = User.Claims.FirstOrDefault(x => x.Type == "uuid");
+
+            if(tokenId is null || userId is null)
+            {
+                return Unauthorized();
+            }
+
+            cache.InvalidateToken(Guid.Parse(tokenId.Value), userId.Value);
+
+            return NoContent();
         }
     }
 }

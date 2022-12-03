@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using ShoppingLikeFlies.Api.Configuration;
 using ShoppingLikeFlies.Api.Security.DAL;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,16 +15,18 @@ namespace ShoppingLikeFlies.Api.Services
         private readonly IOptions<SecurityConfiguration> options;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ITokenCache cache;
-
-        public TokenGenerator(IOptions<SecurityConfiguration> options, UserManager<ApplicationUser> userManager, ITokenCache cache)
+        private readonly ILogger logger;
+        public TokenGenerator(IOptions<SecurityConfiguration> options, UserManager<ApplicationUser> userManager, ITokenCache cache, ILogger logger)
         {
             this.options = options ?? throw new ArgumentNullException(nameof(options));
             this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<string> GenerateToken(ApplicationUser user)
         {
+            logger.Verbose("Method {method} called with user:{user}", nameof(GenerateToken), user.UserName);
             if (user is null)
             {
                 throw new ArgumentNullException(nameof(user));
