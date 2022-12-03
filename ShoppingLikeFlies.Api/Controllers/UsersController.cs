@@ -11,10 +11,10 @@ namespace ShoppingLikeFlies.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class UsersController : ControllerBase
 {
-    private readonly Serilog.ILogger logger;
+    private readonly ILogger<UsersController> logger;
     private readonly UserManager<ApplicationUser> userManager;
 
-    public UsersController(Serilog.ILogger logger, UserManager<ApplicationUser> userManager, IValidator<RegisterRequest> validator)
+    public UsersController(ILogger<UsersController> logger, UserManager<ApplicationUser> userManager, IValidator<RegisterRequest> validator)
     {
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -26,7 +26,7 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<List<UserResponse>>> OnGetAsync
         ()
     {
-        logger.Debug("Method {method} called" , nameof(OnGetAsync));
+        logger.LogInformation("Method {method} called" , nameof(OnGetAsync));
         var list = userManager.Users.ToList().ConvertAll(async x => 
             new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await isAdminOrSelfAsync(Guid.Parse(x.Id)))
             );
@@ -43,7 +43,7 @@ public class UsersController : ControllerBase
             [FromRoute] Guid id
         )
     {
-        logger.Debug("Method {method} called with params: {id}", nameof(OnGetAsync), id);
+        logger.LogInformation("Method {method} called with params: {id}", nameof(OnGetAsync), id);
         var user = await userManager.FindByIdAsync(id.ToString());
 
         if(user == null)
@@ -63,7 +63,7 @@ public class UsersController : ControllerBase
             [FromBody] UpdateUserRequest contract
         )
     {
-        logger.Debug("Method {method} called with params: {id}", nameof(OnUpdateAsync), id);
+        logger.LogInformation("Method {method} called with params: {id}", nameof(OnUpdateAsync), id);
         var user = await userManager.FindByIdAsync(id.ToString());
 
         if (user == null)
@@ -103,7 +103,7 @@ public class UsersController : ControllerBase
             [FromRoute] Guid id
         )
     {
-        logger.Debug("Method {method} called with params: {id}", nameof(OnDeleteAsync), id);
+        logger.LogInformation("Method {method} called with params: {id}", nameof(OnDeleteAsync), id);
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user == null)
         {
@@ -128,7 +128,7 @@ public class UsersController : ControllerBase
             [FromBody] ChangePasswordRequest contract
         )
     {
-        logger.Debug("Method {method} called with params: {id}", nameof(OnPwResetAsync), id);
+        logger.LogInformation("Method {method} called with params: {id}", nameof(OnPwResetAsync), id);
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user == null)
         {
@@ -159,7 +159,7 @@ public class UsersController : ControllerBase
             [FromRoute] Guid id
         )
     {
-        logger.Debug("Method {method} called with params: {id}", nameof(OnAdminFlipAsync), id);
+        logger.LogInformation("Method {method} called with params: {id}", nameof(OnAdminFlipAsync), id);
         var user = await userManager.FindByIdAsync (id.ToString());
         if (user == null)
         {
