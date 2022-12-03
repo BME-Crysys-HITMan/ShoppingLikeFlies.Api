@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ShoppingLikeFlies.Api.Configuration;
+using ShoppingLikeFlies.Api.Security;
 using ShoppingLikeFlies.Api.Security.DAL;
+using ShoppingLikeFlies.Api.Services;
 using System.Text;
 
 namespace ShoppingLikeFlies.Api.Extensions;
@@ -45,7 +47,18 @@ public static class IServiceCollectionExtensions
                 };
             });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("ValidToken", policy =>
+                policy.Requirements.Add(new SecRequirement()));
+
+            options.AddPolicy("AdminOnly", policy =>
+                policy.RequireRole("Admin"));
+        });
+
+        services.AddSingleton<ITokenCache, TokenCache>();
+        services.AddTransient<ITokenGenerator, TokenGenerator>();
+        services.AddTransient<IAuthorizationHandler, SecRequirementHandler>();
 
         return services;
     }
@@ -56,6 +69,21 @@ public static class IServiceCollectionExtensions
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        return services;
+    }
+
+    public static IServiceCollection AddCustomService(this IServiceCollection services, IConfiguration configuration)
+    {
+        string validatorPath = "";
+        string GeneratorDir = "";
+        bool useAzure = false;
+        string DirectoryPath = ".";
+
+        services.AddCaffProcessor(
+            x => { x.Validator = validatorPath; x.GeneratorDir = GeneratorDir; },
+            upload => { upload.ShouldUploadToAzure = useAzure; upload.DirectoryPath = DirectoryPath; },
+            configuration);
+
         return services;
     }
 }
