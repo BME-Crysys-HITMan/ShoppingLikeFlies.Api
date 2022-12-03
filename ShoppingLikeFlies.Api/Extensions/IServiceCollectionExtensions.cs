@@ -85,7 +85,7 @@ public static class IServiceCollectionExtensions
             {
                 Name = "Authorization",
                 In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
+                Type = SecuritySchemeType.Http,
                 Scheme = JwtBearerDefaults.AuthenticationScheme,
             });
             c.AddSecurityRequirement(new OpenApiSecurityRequirement {
@@ -95,7 +95,7 @@ public static class IServiceCollectionExtensions
                         Reference = new OpenApiReference
                         {
                              Type = ReferenceType.SecurityScheme,
-                             Id = "Bearer"
+                             Id = "Bearer",
                         }
                     },
                     new string[] { }
