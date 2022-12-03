@@ -8,13 +8,13 @@ namespace ShoppingLikeFlies.Api.Controllers
     [ApiController]
     public class RegisterController : ControllerBase
     {
-        private readonly ILogger<RegisterController> logger;
+        private readonly Serilog.ILogger _logger;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IValidator<RegisterRequest> validator;
 
-        public RegisterController(ILogger<RegisterController> logger, UserManager<ApplicationUser> userManager, IValidator<RegisterRequest> validator)
+        public RegisterController(Serilog.ILogger logger, UserManager<ApplicationUser> userManager, IValidator<RegisterRequest> validator)
         {
-            logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
         }
@@ -28,7 +28,7 @@ namespace ShoppingLikeFlies.Api.Controllers
                 [FromBody] RegisterRequest contract
             )
         {
-            logger.LogInformation("Method {method} called", nameof(OnPostAsync));
+            _logger.Verbose("Method {method} called", nameof(OnPostAsync));
 
             var result = await validator.ValidateAsync(contract);
             List<string> errors;
