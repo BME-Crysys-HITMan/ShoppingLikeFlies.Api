@@ -11,6 +11,13 @@ try
 
     await app.UseDatabase();
 
+    app.UseCors(x =>
+    {
+        x.AllowAnyOrigin();
+        x.AllowAnyMethod();
+        x.AllowAnyHeader();
+    });
+
     app.UsePipeline();
 
     app.Run();
