@@ -175,7 +175,7 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
-    public async Task<bool> isAdminOrSelfAsync(Guid userId)
+    private async Task<bool> isAdminOrSelfAsync(Guid userId)
     {
         var user =  await userManager.GetUserAsync(User);
         if (user == null)
