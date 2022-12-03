@@ -79,7 +79,7 @@ public static class IServiceCollectionExtensions
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c=>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Shopping like flies - WebApi", Version = "1.0.0" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Shopping like flies - WebApi", Version = "1.0" });
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
