@@ -53,7 +53,7 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await isAdminOrSelfAsync(id)));
+        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await userManager.IsInRoleAsync(user, "Admin")));
     }
 
     [HttpPut]
@@ -97,7 +97,7 @@ public class UsersController : ControllerBase
             return BadRequest(identityResult.Errors);
         }
 
-        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await isAdminOrSelfAsync(id)));
+        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await userManager.IsInRoleAsync(user, "Admin")));
     }
 
     [HttpDelete]
@@ -177,7 +177,7 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-        var role = await isAdminOrSelfAsync(id);
+        var role = await userManager.IsInRoleAsync(user, "Admin");
         IdentityResult identityResult;
         if(role)
             identityResult = await userManager.RemoveFromRoleAsync(user, "Admin");
