@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShoppingLikeFlies.Api.Contracts.Incoming.Users;
 using ShoppingLikeFlies.Api.Security.DAL;
+using System.Collections;
 using System.Diagnostics.Contracts;
 
 namespace ShoppingLikeFlies.Api.Controllers;
@@ -27,9 +28,11 @@ public class UsersController : ControllerBase
         ()
     {
         logger.Debug("Method {method} called" , nameof(OnGetAsync));
-        var list = userManager.Users.ToList().Select(async x =>
-            new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await userManager.IsInRoleAsync(x, "Admin"))
-            ).ToList();
+        var list = new List<UserResponse>();
+        userManager.Users.ToList().ForEach(async x =>
+        {
+            list.Add(new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await userManager.IsInRoleAsync(x, "Admin")));
+        });
         return Ok(list);
         
     }
