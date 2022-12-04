@@ -27,7 +27,7 @@ public class UsersController : ControllerBase
         ()
     {
         logger.Debug("Method {method} called" , nameof(OnGetAsync));
-        var list = userManager.Users.ToList().ConvertAll(async x => 
+        var list = userManager.Users.ToList().Select(async x => 
             new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await isAdminOrSelfAsync(Guid.Parse(x.Id)))
             );
         return Ok(list);
@@ -71,7 +71,7 @@ public class UsersController : ControllerBase
             return NotFound();
         }
         var principal = await userManager.GetUserAsync(User);
-        if (principal.Id != id.ToString())
+        if ( principal==null || principal.Id != id.ToString())
         {
             return Unauthorized();
         }
@@ -135,13 +135,19 @@ public class UsersController : ControllerBase
             return NotFound();
         }
 
-        if(!(await userManager.PasswordValidators[0].ValidateAsync(userManager, user, contract.oldPassword)).Succeeded)
+        if(!await userManager.CheckPasswordAsync(user, contract.oldPassword))
         {
             return Unauthorized();
         }
+        
+        var identityResult = await userManager.ChangePasswordAsync(user, contract.oldPassword, contract.newPassword);
 
-        user.PasswordHash = contract.newPassword;
-        var identityResult = await userManager.UpdateAsync(user);
+        if (!identityResult.Succeeded)
+        {
+            return BadRequest(identityResult.Errors);
+        }
+
+        identityResult = await userManager.UpdateAsync(user);
 
         if (!identityResult.Succeeded)
         {
@@ -171,6 +177,14 @@ public class UsersController : ControllerBase
             identityResult = await userManager.RemoveFromRoleAsync(user, "Admin");
         else
             identityResult = await userManager.AddToRoleAsync(user, "Admin");
+
+        if (identityResult.Succeeded) {
+            var ir = await userManager.UpdateAsync(user);
+            if(!ir.Succeeded)
+            {
+                return Unauthorized(ir.Errors);
+            }
+        }
 
         return Ok();
     }
