@@ -43,7 +43,7 @@ namespace ShoppingLikeFlies.Api.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("upload")]
+        [Route("/upload")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> UploadAsync(CaffUploadRequest contract)
