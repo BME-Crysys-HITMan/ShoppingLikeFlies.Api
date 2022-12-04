@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ShoppingLikeFiles.DomainServices.DTOs;
 using ShoppingLikeFlies.Api.Configuration;
+using ShoppingLikeFlies.Api.Contracts.Incoming;
 using ShoppingLikeFlies.Api.Contracts.Response;
 using ShoppingLikeFlies.Api.Security.DAL;
+using ShoppingLikeFlies.Api.Security.Validators;
 using System.Diagnostics.Contracts;
 
 namespace ShoppingLikeFlies.Api.UnitTest;
@@ -16,12 +18,12 @@ public class UsersControllerUnitTest
     {
         var um = TestHelper.initUserManager();
         var logger = new LoggerConfiguration().CreateBootstrapLogger();
-
+        var validator = new  RegistrationValidator(); ;
         var data = new List<ApplicationUser>
         {
             new ApplicationUser()
             {
-                Id = "123",
+                Id = "9245fe4a-d402-451c-b9ed-9c1a04247482",
                 Email = "test_name",
                 EmailConfirmed = true,
                 UserName = "test_name",
@@ -30,13 +32,13 @@ public class UsersControllerUnitTest
             },
         };
 
-        var resultData = data.ConvertAll(x =>
+        var resultData = data.Select(x =>
             new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, false)
-            );
+            ).ToList();
 
         um.Setup(e => e.Users.ToList()).Returns(data);
 
-        var controller = new UsersController();
+        var controller = new UsersController(logger, um.Object, validator);
         var result = (await controller.OnGetAsync()).Value;
         result.Should().NotBeNull();
 

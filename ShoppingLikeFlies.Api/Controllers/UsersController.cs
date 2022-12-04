@@ -27,9 +27,9 @@ public class UsersController : ControllerBase
         ()
     {
         logger.Debug("Method {method} called" , nameof(OnGetAsync));
-        var list = userManager.Users.ToList().Select(async x => 
-            new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await isAdminOrSelfAsync(Guid.Parse(x.Id)))
-            );
+        var list = userManager.Users.ToList().Select(async x =>
+            new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await userManager.IsInRoleAsync(x, "Admin"))
+            ).ToList();
         return Ok(list);
         
     }
@@ -64,14 +64,17 @@ public class UsersController : ControllerBase
         )
     {
         logger.Debug("Method {method} called with params: {id}", nameof(OnUpdateAsync), id);
+
+
         var user = await userManager.FindByIdAsync(id.ToString());
 
         if (user == null)
         {
             return NotFound();
         }
-        var principal = await userManager.GetUserAsync(User);
-        if ( principal==null || principal.Id != id.ToString())
+
+        var principal = (await userManager.GetUserAsync(User));
+        if (principal == null || principal.Id != id.ToString())
         {
             return Unauthorized();
         }
@@ -178,13 +181,7 @@ public class UsersController : ControllerBase
         else
             identityResult = await userManager.AddToRoleAsync(user, "Admin");
 
-        if (identityResult.Succeeded) {
-            var ir = await userManager.UpdateAsync(user);
-            if(!ir.Succeeded)
-            {
-                return Unauthorized(ir.Errors);
-            }
-        }
+        var ir = await userManager.UpdateAsync(user);
 
         return Ok();
     }
