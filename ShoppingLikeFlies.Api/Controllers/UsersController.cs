@@ -64,17 +64,19 @@ public class UsersController : ControllerBase
         )
     {
         logger.Debug("Method {method} called with params: {id}", nameof(OnUpdateAsync), id);
-        var principal = (await userManager.GetUserAsync(User));
-        if ( principal==null || principal.Id != id.ToString())
-        {
-            return Unauthorized();
-        }
+
 
         var user = await userManager.FindByIdAsync(id.ToString());
 
         if (user == null)
         {
             return NotFound();
+        }
+
+        var principal = (await userManager.GetUserAsync(User));
+        if (principal == null || principal.Id != id.ToString())
+        {
+            //return Unauthorized();
         }
 
         var updatedUser = new ApplicationUser

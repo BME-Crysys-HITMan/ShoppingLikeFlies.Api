@@ -30,7 +30,7 @@ public class LoginControllerUnitTest
                 Creator = "Feri",
                 ThumbnailPath = "https://http.cat/103.jpg",
                 FilePath = "",
-                Comments = new(){ new CommentDTO { Text = "Bela", Id= 1}},
+                Comments = new(){ new CommentDTO { Text = "Bela"}},
             },
         };
 
