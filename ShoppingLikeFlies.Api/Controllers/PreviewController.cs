@@ -18,10 +18,10 @@ public class PreviewController : ControllerBase
 
     [HttpGet]
     [Route("{id:guid}")]
-    public Task<ActionResult> OnGet([FromRoute] Guid id)
+    public async Task<string> OnGet([FromRoute] int id)
     {
         logger.LogInformation("Method {method} called with attributes: {id}", nameof(OnGet), id);
         var caff = await dataService.GetCaffAsync(id);
-        return Content(caff.ThumbnailPath);
+        return caff.ThumbnailPath;
     }
 }
