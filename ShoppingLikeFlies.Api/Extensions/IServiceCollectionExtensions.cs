@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -83,6 +84,17 @@ public static class IServiceCollectionExtensions
         {
             options.MemoryBufferThreshold= Int32.MaxValue;
             options.MultipartBodyLengthLimit= Int32.MaxValue;
+        });
+
+        services.Configure<IISServerOptions>(options =>
+        {
+            options.MaxRequestBodySize = Int32.MaxValue;
+        });
+
+        services.Configure<KestrelServerOptions>(options =>
+        {
+            options.Limits.MaxRequestBodySize = Int32.MaxValue;
+
         });
         services.AddSwaggerGen(c=>
         {
