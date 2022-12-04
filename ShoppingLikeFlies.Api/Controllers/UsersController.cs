@@ -32,7 +32,6 @@ public class UsersController : ControllerBase
         var l = userManager.Users.ToList();
         foreach (var x in l)
         {
-            logger.Debug(x.ToString());
             var role = await userManager.IsInRoleAsync(x, "Admin");
             list.Add(new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, role));
         }
@@ -79,21 +78,17 @@ public class UsersController : ControllerBase
             return NotFound();
         }
         var loginId = User.Claims.First(x => x.Type == "uuid");
-        logger.Debug(loginId.ToString());
         if  (loginId.Value != user.Id)
         {
             return Unauthorized();
         }
 
-        var updatedUser = new ApplicationUser
-        {
-                Email = contract.username,
-                EmailConfirmed = true,
-                UserName = contract.username,
-                LastName = contract.lastname,
-                FirstName = contract.firstname,
-        };
-        var identityResult = await userManager.UpdateAsync(updatedUser);
+        user.Email = contract.username;
+        user.UserName = contract.username;
+        user.LastName = contract.lastname;
+        user.FirstName = contract.firstname;
+
+        var identityResult = await userManager.UpdateAsync(user);
 
         if(!identityResult.Succeeded)
         {
