@@ -76,7 +76,7 @@ public class UsersController : ControllerBase
         var principal = (await userManager.GetUserAsync(User));
         if (principal == null || principal.Id != id.ToString())
         {
-            //return Unauthorized();
+            return Unauthorized();
         }
 
         var updatedUser = new ApplicationUser
