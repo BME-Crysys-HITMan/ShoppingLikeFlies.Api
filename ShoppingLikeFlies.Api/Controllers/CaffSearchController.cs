@@ -20,7 +20,7 @@ namespace ShoppingLikeFlies.Api.Controllers
             this.mapper = mapper;
         }
 
-        [HttpPost]
+        [HttpGet]
         [AllowAnonymous]
         public async Task<List<CaffAllResponse>> SearchAsync(CaffSearchDTO caffSearchDTO)
         {
