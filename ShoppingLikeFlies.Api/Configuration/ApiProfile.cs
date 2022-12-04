@@ -8,7 +8,7 @@ namespace ShoppingLikeFlies.Api.Configuration
         {
             CreateMap<CaffDTO, CaffResponse>()
                 .ForCtorParam("id", _=>_.MapFrom(c=>c.Id))
-                .ForCtorParam("caption", _ => _.MapFrom(c => c.Captions.First().Text))
+                .ForCtorParam("caption", _ => _.MapFrom(c => c.Caption))
                 .ForCtorParam("tags", _ => _.MapFrom(c => c.Tags))
                 .ForCtorParam("comments", _ => _.MapFrom(c => c.Comments))
                 .ForCtorParam("creator", _ => _.MapFrom(c => c.Creator))
