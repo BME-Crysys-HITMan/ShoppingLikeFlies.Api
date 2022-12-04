@@ -82,6 +82,7 @@ public static class IServiceCollectionExtensions
         services.Configure<FormOptions>(options =>
         {
             options.MemoryBufferThreshold= Int32.MaxValue;
+            options.MultipartBodyLengthLimit= Int32.MaxValue;
         });
         services.AddSwaggerGen(c=>
         {

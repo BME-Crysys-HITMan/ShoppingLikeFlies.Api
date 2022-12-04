@@ -47,6 +47,8 @@ namespace ShoppingLikeFlies.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Consumes("multipart/form-data")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueCountLimit = Int32.MaxValue, MultipartBodyLengthLimit = Int32.MaxValue)]
         public async Task<ActionResult> UploadAsync(CaffUploadRequest contract)
         {
             if (contract.file == null) 
