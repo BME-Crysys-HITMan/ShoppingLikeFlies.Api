@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -78,6 +79,10 @@ public static class IServiceCollectionExtensions
         services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
+        services.Configure<FormOptions>(options =>
+        {
+            options.MemoryBufferThreshold= Int32.MaxValue;
+        });
         services.AddSwaggerGen(c=>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Shopping like flies - WebApi", Version = "1.0" });
