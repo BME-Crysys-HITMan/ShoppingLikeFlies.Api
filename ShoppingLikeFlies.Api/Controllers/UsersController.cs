@@ -75,8 +75,8 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-
-        var principal = (await userManager.GetUserAsync(User));
+        var loginId = User.Claims.First(x => x.Type == "uuid");
+        var principal = (await userManager.FindByIdAsync(loginId.Value));
         if (principal == null || principal.Id != id.ToString())
         {
             return Unauthorized();
