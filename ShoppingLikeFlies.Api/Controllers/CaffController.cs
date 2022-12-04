@@ -111,7 +111,7 @@ namespace ShoppingLikeFlies.Api.Controllers
         [Route("upload")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
-        public async Task<ActionResult> UploadAsync([FromForm] IFormFile file)
+        public async Task<ActionResult> UploadAsync(IFormFile file)
         {
             if (file.Length < 1)
                 return new UnsupportedMediaTypeResult();
@@ -124,7 +124,7 @@ namespace ShoppingLikeFlies.Api.Controllers
             {
                 return new UnsupportedMediaTypeResult();
             }
-            using var memoryStream= new MemoryStream();
+            using var memoryStream = new MemoryStream();
             stream.CopyTo(memoryStream);
             await uploadService.UploadFileAsync(memoryStream.ToArray(), caffFileName);
             return Ok();
