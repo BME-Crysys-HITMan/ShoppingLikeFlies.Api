@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShoppingLikeFlies.Api.Contracts.Incoming.Users;
 using ShoppingLikeFlies.Api.Security.DAL;
+using System.Collections;
 using System.Diagnostics.Contracts;
 
 namespace ShoppingLikeFlies.Api.Controllers;
@@ -27,9 +28,13 @@ public class UsersController : ControllerBase
         ()
     {
         logger.Debug("Method {method} called" , nameof(OnGetAsync));
-        var list = userManager.Users.ToList().Select(async x =>
-            new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await userManager.IsInRoleAsync(x, "Admin"))
-            ).ToList();
+        var list = new List<UserResponse>();
+        var l = userManager.Users.ToList();
+        foreach (var x in l)
+        {
+            var role = await userManager.IsInRoleAsync(x, "Admin");
+            list.Add(new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, role));
+        }
         return Ok(list);
         
     }
@@ -50,7 +55,7 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await isAdminOrSelfAsync(id)));
+        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await userManager.IsInRoleAsync(user, "Admin")));
     }
 
     [HttpPut]
@@ -72,29 +77,25 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-
-        var principal = (await userManager.GetUserAsync(User));
-        if (principal == null || principal.Id != id.ToString())
+        var loginId = User.Claims.First(x => x.Type == "uuid");
+        if  (loginId.Value != user.Id)
         {
             return Unauthorized();
         }
 
-        var updatedUser = new ApplicationUser
-        {
-                Email = contract.username,
-                EmailConfirmed = true,
-                UserName = contract.username,
-                LastName = contract.lastname,
-                FirstName = contract.firstname,
-        };
-        var identityResult = await userManager.UpdateAsync(updatedUser);
+        user.Email = contract.username;
+        user.UserName = contract.username;
+        user.LastName = contract.lastname;
+        user.FirstName = contract.firstname;
+
+        var identityResult = await userManager.UpdateAsync(user);
 
         if(!identityResult.Succeeded)
         {
             return BadRequest(identityResult.Errors);
         }
 
-        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await isAdminOrSelfAsync(id)));
+        return Ok(new UserResponse(Guid.Parse(user.Id), user.UserName, user.FirstName, user.LastName, await userManager.IsInRoleAsync(user, "Admin")));
     }
 
     [HttpDelete]
@@ -137,20 +138,13 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-
-        if(!await userManager.CheckPasswordAsync(user, contract.oldPassword))
+        var isValidPassword = await userManager.PasswordValidators[0].ValidateAsync(userManager, user, contract.oldPassword);
+        if (!isValidPassword.Succeeded)
         {
             return Unauthorized();
         }
         
         var identityResult = await userManager.ChangePasswordAsync(user, contract.oldPassword, contract.newPassword);
-
-        if (!identityResult.Succeeded)
-        {
-            return BadRequest(identityResult.Errors);
-        }
-
-        identityResult = await userManager.UpdateAsync(user);
 
         if (!identityResult.Succeeded)
         {
@@ -174,27 +168,14 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-        var role = await isAdminOrSelfAsync(id);
+        var role = await userManager.IsInRoleAsync(user, "Admin");
         IdentityResult identityResult;
+
         if(role)
             identityResult = await userManager.RemoveFromRoleAsync(user, "Admin");
         else
             identityResult = await userManager.AddToRoleAsync(user, "Admin");
 
-        var ir = await userManager.UpdateAsync(user);
-
         return Ok();
-    }
-
-    private async Task<bool> isAdminOrSelfAsync(Guid userId)
-    {
-        var user =  await userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return false;
-        }
-        var isAdmin = await userManager.IsInRoleAsync(user, "Admin");
-        return isAdmin || userId.ToString() == user.Id;
-        
     }
 }
