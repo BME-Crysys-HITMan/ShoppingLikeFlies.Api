@@ -78,7 +78,7 @@ public static class IServiceCollectionExtensions
         services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(c=>
+        services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Shopping like flies - WebApi", Version = "1.0" });
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -109,8 +109,10 @@ public static class IServiceCollectionExtensions
     {
         string validatorPath = configuration.GetSection("CaffValidator").GetValue<string>("ValidatorPath");
         string GeneratorDir = configuration.GetSection("CaffValidator").GetValue<string>("GeneratorDir");
-        bool useAzure = configuration.GetSection("CaffValidator").GetValue<bool>("UseAzure");
-        string DirectoryPath = configuration.GetSection("CaffValidator").GetValue<string>("DirectoryPath");
+        bool useAzure = configuration.GetSection("UploadService").GetValue<bool>("UseAzure");
+        string DirectoryPath = configuration.GetSection("UploadService").GetValue<string>("DirectoryPath");
+
+        services.AddAutoMapper(typeof(ApiProfile).Assembly);
 
         services.AddCaffProcessor(
             x => { x.Validator = validatorPath; },
