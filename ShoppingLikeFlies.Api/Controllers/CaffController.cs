@@ -35,10 +35,29 @@ namespace ShoppingLikeFlies.Api.Controllers
 
         [HttpPost]
         [Authorize(Policy = "AdminOnly")]
-        public Task<ActionResult> CreateAsync()
+        public async Task<IActionResult> CreateAsync([FromForm] UploadRequest upload)
         {
             // helper: https://learn.microsoft.com/en-us/aspnet/web-api/overview/advanced/sending-html-form-data-part-2
-            throw new NotImplementedException();
+            var path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "uploaded";
+            Directory.CreateDirectory(path);
+
+            var fileName = upload.Caff.FileName;
+            MemoryStream s = new MemoryStream();
+            await upload.Caff.CopyToAsync(s);
+            string tmp = path + Path.DirectorySeparatorChar + Guid.NewGuid().ToString() + ".caff";
+            FileStream fs = new FileStream(tmp, FileMode.Create, FileAccess.Write);
+            await upload.Caff.CopyToAsync(fs);
+            fs.Flush();
+            fs.Close();
+
+            int? id = await caffService.UploadFileAsync(tmp);
+
+            if (id is null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(new { id = id.Value });
         }
 
         [HttpGet]

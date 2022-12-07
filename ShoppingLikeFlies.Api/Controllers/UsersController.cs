@@ -5,6 +5,7 @@ using ShoppingLikeFlies.Api.Security.DAL;
 using System.Collections;
 using System.Diagnostics.Contracts;
 
+
 namespace ShoppingLikeFlies.Api.Controllers;
 
 [Route("api/[controller]")]
@@ -36,7 +37,7 @@ public class UsersController : ControllerBase
             list.Add(new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, role));
         }
         return Ok(list);
-        
+
     }
 
     [HttpGet]
@@ -51,7 +52,7 @@ public class UsersController : ControllerBase
         logger.Debug("Method {method} called with params: {id}", nameof(OnGetAsync), id);
         var user = await userManager.FindByIdAsync(id.ToString());
 
-        if(user == null)
+        if (user == null)
         {
             return NotFound();
         }
@@ -83,14 +84,17 @@ public class UsersController : ControllerBase
             return Unauthorized();
         }
 
-        user.Email = contract.username;
-        user.UserName = contract.username;
-        user.LastName = contract.lastname;
-        user.FirstName = contract.firstname;
+        var updatedUser = new ApplicationUser
+        {
+            Email = contract.username,
+            EmailConfirmed = true,
+            UserName = contract.username,
+            LastName = contract.lastname,
+            FirstName = contract.firstname,
+        };
+        var identityResult = await userManager.UpdateAsync(updatedUser);
 
-        var identityResult = await userManager.UpdateAsync(user);
-
-        if(!identityResult.Succeeded)
+        if (!identityResult.Succeeded)
         {
             return BadRequest(identityResult.Errors);
         }
@@ -138,12 +142,12 @@ public class UsersController : ControllerBase
         {
             return NotFound();
         }
-        var isValidPassword = await userManager.PasswordValidators[0].ValidateAsync(userManager, user, contract.oldPassword);
-        if (!isValidPassword.Succeeded)
+        
+        if (!await userManager.CheckPasswordAsync(user, contract.oldPassword))
         {
             return Unauthorized();
         }
-        
+
         var identityResult = await userManager.ChangePasswordAsync(user, contract.oldPassword, contract.newPassword);
 
         if (!identityResult.Succeeded)
@@ -163,7 +167,7 @@ public class UsersController : ControllerBase
         )
     {
         logger.Debug("Method {method} called with params: {id}", nameof(OnAdminFlipAsync), id);
-        var user = await userManager.FindByIdAsync (id.ToString());
+        var user = await userManager.FindByIdAsync(id.ToString());
         if (user == null)
         {
             return NotFound();
@@ -172,10 +176,23 @@ public class UsersController : ControllerBase
         IdentityResult identityResult;
 
         if(role)
+
             identityResult = await userManager.RemoveFromRoleAsync(user, "Admin");
         else
             identityResult = await userManager.AddToRoleAsync(user, "Admin");
 
         return Ok();
+    }
+        
+    private async Task<bool> isAdminOrSelfAsync(Guid userId)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return false;
+        }
+        var isAdmin = await userManager.IsInRoleAsync(user, "Admin");
+        return isAdmin || userId.ToString() == user.Id;
+
     }
 }

@@ -8,7 +8,7 @@ namespace ShoppingLikeFlies.Api.Controllers
     [ApiController]
     public class CaffSearchController : ControllerBase
     {
-        
+
         private readonly IDataService dataService;
         private readonly Serilog.ILogger logger;
         private readonly IMapper mapper;
