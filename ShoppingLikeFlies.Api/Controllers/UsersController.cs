@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ShoppingLikeFlies.Api.Contracts.Incoming.Users;
 using ShoppingLikeFlies.Api.Security.DAL;
-using System.Diagnostics.Contracts;
 
 namespace ShoppingLikeFlies.Api.Controllers;
 
@@ -26,12 +25,13 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<List<UserResponse>>> OnGetAsync
         ()
     {
-        logger.Debug("Method {method} called" , nameof(OnGetAsync));
+        logger.Debug("Method {method} called", nameof(OnGetAsync));
         var list = userManager.Users.ToList().Select(async x =>
             new UserResponse(Guid.Parse(x.Id), x.UserName, x.FirstName, x.LastName, await userManager.IsInRoleAsync(x, "Admin"))
             ).ToList();
+
         return Ok(list);
-        
+
     }
 
     [HttpGet]
@@ -46,7 +46,7 @@ public class UsersController : ControllerBase
         logger.Debug("Method {method} called with params: {id}", nameof(OnGetAsync), id);
         var user = await userManager.FindByIdAsync(id.ToString());
 
-        if(user == null)
+        if (user == null)
         {
             return NotFound();
         }
@@ -81,15 +81,15 @@ public class UsersController : ControllerBase
 
         var updatedUser = new ApplicationUser
         {
-                Email = contract.username,
-                EmailConfirmed = true,
-                UserName = contract.username,
-                LastName = contract.lastname,
-                FirstName = contract.firstname,
+            Email = contract.username,
+            EmailConfirmed = true,
+            UserName = contract.username,
+            LastName = contract.lastname,
+            FirstName = contract.firstname,
         };
         var identityResult = await userManager.UpdateAsync(updatedUser);
 
-        if(!identityResult.Succeeded)
+        if (!identityResult.Succeeded)
         {
             return BadRequest(identityResult.Errors);
         }
@@ -138,11 +138,11 @@ public class UsersController : ControllerBase
             return NotFound();
         }
 
-        if(!await userManager.CheckPasswordAsync(user, contract.oldPassword))
+        if (!await userManager.CheckPasswordAsync(user, contract.oldPassword))
         {
             return Unauthorized();
         }
-        
+
         var identityResult = await userManager.ChangePasswordAsync(user, contract.oldPassword, contract.newPassword);
 
         if (!identityResult.Succeeded)
@@ -169,14 +169,14 @@ public class UsersController : ControllerBase
         )
     {
         logger.Debug("Method {method} called with params: {id}", nameof(OnAdminFlipAsync), id);
-        var user = await userManager.FindByIdAsync (id.ToString());
+        var user = await userManager.FindByIdAsync(id.ToString());
         if (user == null)
         {
             return NotFound();
         }
         var role = await isAdminOrSelfAsync(id);
         IdentityResult identityResult;
-        if(role)
+        if (role)
             identityResult = await userManager.RemoveFromRoleAsync(user, "Admin");
         else
             identityResult = await userManager.AddToRoleAsync(user, "Admin");
@@ -188,13 +188,13 @@ public class UsersController : ControllerBase
 
     private async Task<bool> isAdminOrSelfAsync(Guid userId)
     {
-        var user =  await userManager.GetUserAsync(User);
+        var user = await userManager.GetUserAsync(User);
         if (user == null)
         {
             return false;
         }
         var isAdmin = await userManager.IsInRoleAsync(user, "Admin");
         return isAdmin || userId.ToString() == user.Id;
-        
+
     }
 }
